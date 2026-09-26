@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Failure Prediction AI - Startup & Project Risk Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* ROOT */
+            --bg-primary: #050608;
+            --bg-secondary: #0A0D12;
+            --surface: #10151C;
+            --surface-elevated: #151B24;
+            --surface-soft: #1A202A;
+
+            /* TEXT */
+            --text-primary: #F5F3EE;
+            --text-secondary: #C5C8CE;
+            --text-muted: #858C97;
+
+            /* PREMIUM GOLD */
+            --gold-primary: #D6A84F;
+            --gold-light: #F2D58A;
+            --gold-champagne: #E7C77A;
+            --gold-deep: #9A6A22;
+            --gold-glow: rgba(214,168,79,0.22);
+
+            /* WARM WHITE */
+            --warm-white: #FFFDF7;
+
+            /* SILVER */
+            --silver: #BFC7D2;
+
+            /* SEMANTIC COLORS */
+            --success: #48D7A0;
+            --warning: #E7B85C;
+            --danger: #F06B72;
+            --info: #79AFFF;
+
+            /* BORDERS */
+            --border: rgba(255,255,255,0.12);
+            --border-soft: rgba(255,255,255,0.07);
+            
+            /* LEGACY / COMPAT (Mapped to new system where applicable) */
+            --bg: var(--bg-primary);
+            --bg-deep: var(--bg-secondary);
+            --surface-hover: var(--surface-soft);
+            --surface-glass: rgba(16, 21, 28, 0.72);
+            --muted: var(--text-muted);
+            --muted-dark: #68717D;
+            --color-low: var(--success);
+            --color-medium: var(--warning);
+            --color-high: var(--danger);
+            --color-info: var(--info);
+            --color-success: var(--success);
+            --color-critical: var(--danger);
+            
+            /* Sizing & Transitions */
+            --logo: 15.5px;
+            --logo-mark: 22px;
+            --nav: 14px;
+            --nav-h: 40px;
+            --btn: 13.5px;
+            --btn-h: 40px;
+            --hero-btn-h: 42px;
+            --h1: 48px;
+            --lede: 15.5px;
+            --badge: 12.5px;
+            --stat-size: 13.5px;
+            --header-y: 22px;
+            --header-x: 40px;
+            --stats-x: 72px;
+            --stats-y: 36px;
+            --hero-gap: 40px;
+            --copy-max: 860px;
+            --lede-max: 470px;
+            
+            --error: #F06C6C;
+            --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background: transparent !important;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: transparent !important;
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 
+         ========================================================
+         LIQUID FABRIC AGENT WAVE (PERSISTENT BACKGROUND)
+         ========================================================
+        */
+        .hero-photo {
+            position: fixed;
+            inset: 0;
+            z-index: -3;
+            overflow: hidden;
+            background: #000;
+        }
+        .hero-photo video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            opacity: 0.85; /* Slight dimming so UI pops */
+        }
+        .gold-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(214, 168, 79, 0.15); /* Gold shade */
+            mix-blend-mode: color;
+            pointer-events: none;
+        }
+        .gold-overlay::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent, #050608 95%);
+        }
+
+        .liquid-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 120%; /* Extra height for parallax */
+            z-index: 1;
+            filter: blur(4px) contrast(1.1);
+            opacity: 0.85;
+            will-change: transform;
+        }
+
+        .grain-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.04"/%3E%3C/svg%3E');
+            opacity: 1;
+        }
+
+        .vignette-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+            background: radial-gradient(circle at 50% 40%, transparent 20%, #000000 90%);
+        }
+
+        .cursor-light {
+            position: absolute;
+            width: 1000px;
+            height: 1000px;
+            background: radial-gradient(500px circle, rgba(214,168,79,0.045), transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 4;
+            opacity: 0;
+            transition: opacity 1s ease;
+            mix-blend-mode: screen;
+        }
+        
+        /* Absolute scrim to organically dim the wave as user scrolls down */
+        .page-scrim {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            pointer-events: none;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 20%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.75) 100%);
+        }
+
+        /* Layout */
+        .container {
+            max-width: var(--copy-max);
+            margin: 0 auto;
+            padding: 0 var(--header-x);
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--header-y) 0;
+            margin-bottom: var(--hero-gap);
+        }
+        
+        .logo-area h1 {
+            font-size: var(--logo);
+            font-weight: 500;
+            color: var(--text);
+            letter-spacing: -0.01em;
+            margin-bottom: 2px;
+        }
+
+        .logo-area p {
+            font-size: 0.75rem;
+            color: var(--muted);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: var(--nav);
+            color: var(--text);
+            background: rgba(10, 10, 10, 0.7);
+            height: var(--nav-h);
+            padding: 0 16px;
+            border-radius: 99px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+            animation: pulse-dot 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 10px rgba(16,185,129,0.8); }
+            50% { opacity: 0.4; transform: scale(0.85); box-shadow: 0 0 2px rgba(16,185,129,0.2); }
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            position: relative;
+            padding: 20px 0 0 0;
+            border-radius: 32px;
+            background: radial-gradient(circle at center, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 60%);
+        }
+
+        .hero h2 {
+            font-size: var(--h1);
+            font-weight: 600;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            color: var(--text);
+        }
+
+        .hero h2 span {
+            color: var(--muted);
+        }
+
+        .hero p {
+            font-size: var(--lede);
+            color: #B8C0CB;
+            max-width: var(--lede-max);
+            margin: 0 auto 48px auto;
+            line-height: 1.6;
+        }
+
+
+        .premium-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 260px;
+            height: 64px;
+            border-radius: 999px;
+            background: rgba(15, 19, 26, 0.85);
+            border: 1px solid rgba(214,168,79,0.5);
+            color: #F2C96B;
+            font-size: 1.125rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(214,168,79,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+            transition: all 0.4s ease;
+            text-decoration: none;
+            margin: 0 auto;
+        }
+        .premium-cta:hover {
+            background: rgba(214,168,79,0.1);
+            border-color: rgba(242,201,107,0.8);
+            box-shadow: 0 0 35px rgba(214,168,79,0.35), inset 0 1px 0 rgba(255,255,255,0.1);
+            transform: translateY(-3px);
+            color: #ffffff;
+        }
+        .premium-cta:active {
+            transform: translateY(1px) scale(0.98);
+            box-shadow: 0 0 15px rgba(214,168,79,0.4);
+        }
+        .cta-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        /* Feasibility Numeric Inputs */
+        .feasibility-number {
+            width: 100%;
+            text-align: center;
+            font-size: 32px;
+            font-weight: 600;
+            color: #F5F5F5;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 16px 0;
+            transition: all 0.3s ease;
+            -moz-appearance: textfield;
+        }
+        .feasibility-number::-webkit-inner-spin-button, 
+        .feasibility-number::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .feasibility-number:focus {
+            border-color: rgba(242,201,107,0.75);
+            box-shadow: 0 0 25px rgba(214,168,79,0.16);
+            outline: none;
+        }
+        .metric-visual {
+            margin-top: 10px;
+        }
+        .metric-track {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            position: relative;
+            margin-bottom: 8px;
+        }
+        .metric-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            background: var(--metric-color, #D6A84F);
+            border-radius: 2px;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+        .metric-thumb {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--metric-color, #D6A84F);
+            transition: left 0.3s ease, box-shadow 0.3s ease;
+        }
+        .metric-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--muted);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        /* Feature Cards */
+        .features-footer {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            padding: 40px 0 80px;
+            max-width: var(--copy-max);
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+        .feature-card {
+            background: rgba(15, 19, 26, 0.82);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 32px 24px;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(214,168,79,0.5);
+            background: rgba(19, 24, 32, 0.92);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3), 0 0 25px rgba(214,168,79,0.12);
+        }
+        .feature-icon-wrapper {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(214,168,79,0.2);
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 20px;
+            color: #D6A84F;
+            transition: all 0.4s ease;
+        }
+        .feature-card:hover .feature-icon-wrapper {
+            background: rgba(214,168,79,0.15);
+            border-color: rgba(242,201,107,0.6);
+            color: #F2C96B;
+            box-shadow: 0 0 20px rgba(214,168,79,0.3);
+            transform: translateY(-2px) scale(1.05);
+        }
+        .feature-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+        }
+        .feature-card:hover .feature-title {
+            color: #ffffff;
+        }
+        .feature-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            transition: color 0.3s ease;
+        }
+        .feature-card:hover .feature-desc {
+            color: #e0e0e0;
+        }
+
+
+        .has-error .error-msg {
+            display: flex !important;
+        }
+        .has-error input, .has-error textarea, .has-error select {
+            border-color: #e07a5f !important;
+            background: rgba(224, 122, 95, 0.05) !important;
+        }
+        .has-error input:focus, .has-error textarea:focus, .has-error select:focus {
+            box-shadow: 0 0 15px rgba(224, 122, 95, 0.2) !important;
+        }
+
+        /* Error Messages Refined */
+        .error-msg {
+            display: none;
+            color: #e07a5f;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 8px;
+            align-items: center;
+            gap: 6px;
+        }
+        .error-msg::before {
+            content: '⚠';
+            font-size: 0.9rem;
+        }
+        
+        .hero-cta {
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 52px;
+            padding: 0 32px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.09), rgba(255,255,255,0.035));
+            border: 1px solid rgba(214,168,79,0.32);
+            color: #FFFDF7;
+            font-size: var(--btn);
+            font-weight: 500;
+            border-radius: 99px;
+            text-decoration: none;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border 0.4s ease, background 0.4s ease;
+            backdrop-filter: blur(16px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+
+        .hero-cta::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(214,168,79,0.2), transparent);
+            transform: skewX(-20deg);
+            transition: left 0.7s ease;
+        }
+
+        .hero-cta:hover {
+            background: rgba(214,168,79,0.09);
+            border-color: rgba(242,213,138,0.70);
+            transform: translateY(-3px);
+            box-shadow: 0 0 0 1px rgba(214,168,79,0.08), 0 10px 40px rgba(214,168,79,0.16);
+        }
+
+        .hero-cta:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .hero-cta:focus-visible {
+            outline: 2px solid rgba(159, 185, 216, 0.6);
+            outline-offset: 2px;
+        }
+
+        .hero-cta:hover::before {
+            left: 150%;
+        }
+
+        /* Workspace */
+        .workspace-header {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-secondary);
+        }
+
+                .workspace-container {
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .analysis-section {
+            background: rgba(15, 19, 26, 0.82);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 22px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.28);
+            padding: 48px;
+            margin-bottom: 40px;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden; /* for radial gradient */
+
+        }
+        
+
+        
+        .analysis-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(
+                circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                rgba(214,168,79,0.06),
+                transparent 35%
+            );
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .analysis-section > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .analysis-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .analysis-section:hover {
+            box-shadow: 0 25px 70px rgba(0,0,0,0.35), 0 0 35px rgba(214,168,79,0.16), inset 0 1px 0 rgba(255,255,255,0.05);
+            transform: translateY(-4px);
+            background: rgba(19, 24, 32, 0.92);
+            border-color: rgba(214,168,79,0.4);
+        }
+        
+        .analysis-section:hover::before {
+            opacity: 1;
+        }
+
+        .analysis-section.active-card {
+            border: 1px solid rgba(242,201,107,0.75);
+            box-shadow: 0 25px 80px rgba(0,0,0,0.40), 0 0 45px rgba(214,168,79,0.22), inset 0 1px 0 rgba(242,201,107,0.08);
+            background: rgba(19, 24, 32, 0.92);
+            transform: translateY(-4px);
+        }
+        
+        .analysis-section.active-card::before {
+            opacity: 1;
+            background: radial-gradient(
+                circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                rgba(214,168,79,0.10),
+                transparent 45%
+            );
+        }
+
+        .section-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+
+
+
+        .section-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            
+        }
+
+        .section-badge-wrapper {
+            margin-right: 20px;
+        }
+
+        .section-num {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(214,168,79,0.06);
+            border: 1px solid rgba(214,168,79,0.3);
+            font-size: 1.125rem;
+            color: var(--gold-light);
+            font-weight: 500;
+            box-shadow: inset 0 0 10px rgba(214,168,79,0.1), 0 0 15px rgba(214,168,79,0.15);
+            transition: all 0.4s ease;
+        }
+
+        .active-section .section-num, .analysis-section:hover .section-num, .analysis-section:focus-within .section-num {
+            background: rgba(214,168,79,0.12);
+            border-color: rgba(214,168,79,0.6);
+            box-shadow: inset 0 0 15px rgba(214,168,79,0.2), 0 0 25px rgba(214,168,79,0.3);
+            text-shadow: 0 0 10px rgba(214,168,79,0.5);
+        }
+
+        .section-titles {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+            margin-bottom: 6px;
+        }
+
+        .section-subtitle {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+        }
+
+        .active-section {
+            border-color: rgba(210, 225, 245, 0.22);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+
+        .form-group {
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        .form-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem; /* 14px */
+            color: #D7DCE3;
+            margin-bottom: 10px;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            transition: color 0.25s ease;
+        }
+
+        .form-group:focus-within label {
+            color: #F1F4F8;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: color 0.3s ease;
+        }
+
+        .input-wrapper textarea ~ .input-icon {
+            top: 24px; /* Align with first line of textarea */
+            transform: none;
+        }
+
+        .char-counter {
+            position: absolute;
+            bottom: 12px;
+            right: 18px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 16px 18px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.25s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .input-wrapper input, .input-wrapper textarea, .input-wrapper select {
+            padding-left: 48px;
+        }
+
+        .input-wrapper textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        input:hover, textarea:hover, select:hover {
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: rgba(214, 168, 79, 0.75);
+            background: rgba(214, 168, 79, 0.05);
+            box-shadow: 0 0 20px rgba(214, 168, 79, 0.12);
+        }
+
+        .input-wrapper:focus-within .input-icon {
+            color: rgba(217, 169, 79, 0.9);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C5C8CE' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            background-size: 16px;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+        select option {
+            background: #10151C;
+            color: #F5F3EE;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 20px rgba(255,255,255,0.8); }
+            50% { opacity: 0.6; transform: scale(1.6); box-shadow: 0 0 40px rgba(255,255,255,0.4); }
+        }
+
+        /* Responsive */
+                @media (max-width: 1024px) {
+            .features-footer { grid-template-columns: 1fr 1fr !important; }
+        }
+
+        @media (max-width: 768px) {
+            .hero h2 { font-size: 2.5rem; }
+            .form-grid { grid-template-columns: 1fr; gap: 24px; }
+            .analysis-section { padding: 32px 20px; }
+            .workspace-container { margin-bottom: 24px; }
+            .features-footer { grid-template-columns: 1fr !important; }
+    
+        .premium-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 260px;
+            height: 64px;
+            border-radius: 999px;
+            background: rgba(15, 19, 26, 0.85);
+            border: 1px solid rgba(214,168,79,0.5);
+            color: #F2C96B;
+            font-size: 1.125rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(214,168,79,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+            transition: all 0.4s ease;
+            text-decoration: none;
+            margin: 0 auto;
+        }
+        .premium-cta:hover {
+            background: rgba(214,168,79,0.1);
+            border-color: rgba(242,201,107,0.8);
+            box-shadow: 0 0 35px rgba(214,168,79,0.35), inset 0 1px 0 rgba(255,255,255,0.1);
+            transform: translateY(-3px);
+            color: #ffffff;
+        }
+        .premium-cta:active {
+            transform: translateY(1px) scale(0.98);
+            box-shadow: 0 0 15px rgba(214,168,79,0.4);
+        }
+        .cta-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        /* Feasibility Numeric Inputs */
+        .feasibility-number {
+            width: 100%;
+            text-align: center;
+            font-size: 32px;
+            font-weight: 600;
+            color: #F5F5F5;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 16px 0;
+            transition: all 0.3s ease;
+            -moz-appearance: textfield;
+        }
+        .feasibility-number::-webkit-inner-spin-button, 
+        .feasibility-number::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .feasibility-number:focus {
+            border-color: rgba(242,201,107,0.75);
+            box-shadow: 0 0 25px rgba(214,168,79,0.16);
+            outline: none;
+        }
+        .metric-visual {
+            margin-top: 10px;
+        }
+        .metric-track {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            position: relative;
+            margin-bottom: 8px;
+        }
+        .metric-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            background: var(--metric-color, #D6A84F);
+            border-radius: 2px;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+        .metric-thumb {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--metric-color, #D6A84F);
+            transition: left 0.3s ease, box-shadow 0.3s ease;
+        }
+        .metric-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--muted);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        /* Feature Cards */
+        .features-footer {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            padding: 40px 0 80px;
+            max-width: var(--copy-max);
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+        .feature-card {
+            background: rgba(15, 19, 26, 0.82);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 32px 24px;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(214,168,79,0.5);
+            background: rgba(19, 24, 32, 0.92);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3), 0 0 25px rgba(214,168,79,0.12);
+        }
+        .feature-icon-wrapper {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(214,168,79,0.2);
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 20px;
+            color: #D6A84F;
+            transition: all 0.4s ease;
+        }
+        .feature-card:hover .feature-icon-wrapper {
+            background: rgba(214,168,79,0.15);
+            border-color: rgba(242,201,107,0.6);
+            color: #F2C96B;
+            box-shadow: 0 0 20px rgba(214,168,79,0.3);
+            transform: translateY(-2px) scale(1.05);
+        }
+        .feature-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+        }
+        .feature-card:hover .feature-title {
+            color: #ffffff;
+        }
+        .feature-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            transition: color 0.3s ease;
+        }
+        .feature-card:hover .feature-desc {
+            color: #e0e0e0;
+        }
+
+
+        .has-error .error-msg {
+            display: flex !important;
+        }
+        .has-error input, .has-error textarea, .has-error select {
+            border-color: #e07a5f !important;
+            background: rgba(224, 122, 95, 0.05) !important;
+        }
+        .has-error input:focus, .has-error textarea:focus, .has-error select:focus {
+            box-shadow: 0 0 15px rgba(224, 122, 95, 0.2) !important;
+        }
+
+        /* Error Messages Refined */
+        .error-msg {
+            display: none;
+            color: #e07a5f;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 8px;
+            align-items: center;
+            gap: 6px;
+        }
+        .error-msg::before {
+            content: '⚠';
+            font-size: 0.9rem;
+        }
+        
+        .hero-cta {
+ width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Organic Volumetric Fabric/Liquid Wave Background -->
+    <!-- Vesper Video Background -->
+    <div class="hero-photo" id="persistentBgWrapper">
+        <video autoplay loop muted playsinline src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260818_072341_50851634-bbc3-4c33-9acc-7647d4db44aa.mp4"></video>
+        <div class="gold-overlay"></div>
+    </div>
+    
+    <!-- Scrim to darken wave at the bottom of the page -->
+    <div class="page-scrim"></div>
+
+    <!-- Processing Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-pulse"></div>
+        
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo-area">
+                <h1>Failure Prediction AI</h1>
+                <p>Startup & Project Risk Analyzer</p>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot" style="background:#4ade80; box-shadow:0 0 8px #4ade80;"></div>
+                AI Analysis Ready
+            </div>
+        </header>
+
+        
+        <section class="hero">
+            <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 14px; background: rgba(214,168,79,0.08); border: 1px solid rgba(214,168,79,0.3); border-radius: 99px; margin-bottom: 24px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--gold-primary)"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path></svg>
+                <span style="font-size: 0.75rem; color: var(--gold-primary); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;">AI-Powered Risk Intelligence</span>
+            </div>
+
+            <h2>Understand the future of your project.<br><span>before you build.</span></h2>
+            <p>AI-powered project intelligence for evaluating risk, feasibility, market conditions, competition, and strategic opportunities.</p>
+            <a href="#workspace" class="premium-cta" id="heroCta">Analyze Your Project</a>
+        </section>
+
+        
+
+        <div id="workspace" class="workspace-header">Project Input Workspace</div>
+
+        <form action="/submit" method="POST" id="analysisForm" novalidate>
+            <div class="workspace-container">
+            
+            <div class="analysis-section">
+                <div class="section-header">
+                    <div class="section-badge-wrapper"><span class="section-num">01</span></div>
+                    <div class="section-titles">
+                        <h3 class="section-title">Project Overview</h3>
+                        <p class="section-subtitle">Basic information about your project and its core value proposition.</p>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="grp-name">
+                    <label>Project Name *</label>
+                    <div class="input-wrapper"><svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4C7 4 3 5.5 3 7c0 1.5 4 3 9 3s9-1.5 9-3c0-1.5-4-3-9-3Z"/><path d="M3 7v10c0 1.5 4 3 9 3s9-1.5 9-3V7"/><path d="M3 12c0 1.5 4 3 9 3s9-1.5 9-3"/></svg><input type="text" name="project_name" placeholder="e.g., Quantum Delivery" required></div>
+                    <div class="error-msg">Project name is required.</div>
+                </div>
+                <div class="form-group" id="grp-desc">
+                    <label>Project Description *</label>
+                    <div class="input-wrapper"><svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><textarea name="project_description" placeholder="Describe the core offering and value proposition..." required></textarea><div class="char-counter">0/500</div></div>
+                    <div class="error-msg">Project description is required.</div>
+                </div>
+                <div class="form-group" id="grp-market">
+                    <label>Target Market *</label>
+                    <div class="input-wrapper"><svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><textarea name="target_market" placeholder="Who is the primary customer?" required></textarea></div>
+                    <div class="error-msg">Target market is required.</div>
+                </div>
+            </div>
+
+            <div class="analysis-section">
+                <div class="section-header">
+                    <div class="section-badge-wrapper"><span class="section-num">02</span></div>
+                    <div class="section-titles">
+                        <h3 class="section-title">Business Context</h3>
+                        <p class="section-subtitle">Market conditions, industry, resources, competition, and project objectives.</p>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group" id="grp-budget">
+                        <label>Budget (USD) *</label>
+                        <div class="input-wrapper"><svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4C7 4 3 5.5 3 7c0 1.5 4 3 9 3s9-1.5 9-3c0-1.5-4-3-9-3Z"/><path d="M3 7v10c0 1.5 4 3 9 3s9-1.5 9-3V7"/><path d="M3 12c0 1.5 4 3 9 3s9-1.5 9-3"/></svg><input type="number" name="budget" placeholder="0" required min="0"></div>
+                        <div class="error-msg">Valid numeric budget is required.</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Competition</label>
+                        <input type="text" name="competition" placeholder="Direct and indirect competitors">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Resources</label>
+                        <div class="input-wrapper"><svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><textarea name="resources" placeholder="Current team, assets, or partnerships..."></textarea></div>
+                    </div>
+                    <div class="form-group" id="grp-obj">
+                        <label>Objectives *</label>
+                        <div class="input-wrapper"><svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg><textarea name="objectives" placeholder="Key goals and milestones..." required></textarea></div>
+                        <div class="error-msg">Objectives are required.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analysis-section">
+                <div class="section-header">
+                    <div class="section-badge-wrapper"><span class="section-num">03</span></div>
+                    <div class="section-titles">
+                        <h3 class="section-title">Risk Intelligence</h3>
+                        <p class="section-subtitle">Evaluate the key factors that influence project risk.</p>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Market Competition</label>
+                        <select name="rm_competition">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Team Expertise</label>
+                        <select name="rm_team">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Resource Availability</label>
+                        <select name="rm_resources">
+                            <option value="Limited">Limited</option>
+                            <option value="Moderate" selected>Moderate</option>
+                            <option value="Good">Good</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Innovation Level</label>
+                        <select name="rm_innovation">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Market Research</label>
+                        <select name="rm_research">
+                            <option value="Limited">Limited</option>
+                            <option value="Moderate" selected>Moderate</option>
+                            <option value="Strong">Strong</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analysis-section">
+                <div class="section-header">
+                    <div class="section-badge-wrapper"><span class="section-num">04</span></div>
+                    <div class="section-titles">
+                        <h3 class="section-title">Feasibility Assessment</h3>
+                        <p class="section-subtitle">Estimate the project's feasibility across key dimensions.</p>
+                    </div>
+                </div>
+                
+                                                <div class="form-grid">
+                    <div class="feasibility-card">
+                        <div class="metric-info">
+                            <label style="margin: 0; font-size: 0.8rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase;">Market Opportunity</label>
+                        </div>
+                        <div class="metric-input-wrapper">
+                            <input type="number" name="f_market" value="50" min="0" max="100" class="feasibility-number" required>
+                        </div>
+                        <div class="metric-visual">
+                            <div class="metric-track">
+                                <div class="metric-fill" id="f_market_fill"></div>
+                                <div class="metric-thumb" id="f_market_thumb"></div>
+                            </div>
+                            <div class="metric-labels"><span>LOW</span><span>HIGH</span></div>
+                        </div>
+                    </div>
+                    <div class="feasibility-card">
+                        <div class="metric-info">
+                            <label style="margin: 0; font-size: 0.8rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase;">Team Capability</label>
+                        </div>
+                        <div class="metric-input-wrapper">
+                            <input type="number" name="f_team" value="50" min="0" max="100" class="feasibility-number" required>
+                        </div>
+                        <div class="metric-visual">
+                            <div class="metric-track">
+                                <div class="metric-fill" id="f_team_fill"></div>
+                                <div class="metric-thumb" id="f_team_thumb"></div>
+                            </div>
+                            <div class="metric-labels"><span>LOW</span><span>HIGH</span></div>
+                        </div>
+                    </div>
+                    <div class="feasibility-card">
+                        <div class="metric-info">
+                            <label style="margin: 0; font-size: 0.8rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase;">Competitive Advantage</label>
+                        </div>
+                        <div class="metric-input-wrapper">
+                            <input type="number" name="f_comp" value="50" min="0" max="100" class="feasibility-number" required>
+                        </div>
+                        <div class="metric-visual">
+                            <div class="metric-track">
+                                <div class="metric-fill" id="f_comp_fill"></div>
+                                <div class="metric-thumb" id="f_comp_thumb"></div>
+                            </div>
+                            <div class="metric-labels"><span>LOW</span><span>HIGH</span></div>
+                        </div>
+                    </div>
+                    <div class="feasibility-card">
+                        <div class="metric-info">
+                            <label style="margin: 0; font-size: 0.8rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase;">Resource Availability</label>
+                        </div>
+                        <div class="metric-input-wrapper">
+                            <input type="number" name="f_res" value="50" min="0" max="100" class="feasibility-number" required>
+                        </div>
+                        <div class="metric-visual">
+                            <div class="metric-track">
+                                <div class="metric-fill" id="f_res_fill"></div>
+                                <div class="metric-thumb" id="f_res_thumb"></div>
+                            </div>
+                            <div class="metric-labels"><span>LOW</span><span>HIGH</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cta-container">
+                <button type="submit" id="submitBtn" class="premium-cta">
+                    <span id="btnText">Analyze Project</span>
+                    
+                </button>
+            </div>
+            
+        </form>
+    </div>
+
+        <div class="features-footer" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; padding: 40px 0 80px; max-width: var(--copy-max); margin: 0 auto; position: relative; z-index: 10;">
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="color: var(--gold-primary); background: rgba(214,168,79,0.08); padding: 10px; border-radius: 12px; border: 1px solid rgba(214,168,79,0.2);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 12 2.1 12"/><path d="M12 12 6.3 4.9"/><path d="M12 12 21.9 12"/><path d="M12 12 17.7 19.1"/></svg>
+                </div>
+                <div>
+                    <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">AI-Powered Analysis</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary);">Multi-dimensional risk evaluation</p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="color: var(--gold-primary); background: rgba(214,168,79,0.08); padding: 10px; border-radius: 12px; border: 1px solid rgba(214,168,79,0.2);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+                </div>
+                <div>
+                    <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Strategic Insights</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary);">Actionable recommendations</p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="color: var(--gold-primary); background: rgba(214,168,79,0.08); padding: 10px; border-radius: 12px; border: 1px solid rgba(214,168,79,0.2);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5"/><line x1="9" y1="9" x2="10" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+                </div>
+                <div>
+                    <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Comprehensive Report</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary);">Detailed intelligence output</p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="color: var(--gold-primary); background: rgba(214,168,79,0.08); padding: 10px; border-radius: 12px; border: 1px solid rgba(214,168,79,0.2);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                </div>
+                <div>
+                    <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Secure & Private</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary);">Your data stays confidential</p>
+                </div>
+            </div>
+        </div>
+
+    <script>
+        
+        // Form Submit & Loading State Logic
+        document.getElementById('analysisForm').addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            const requiredFields = [
+                {name: 'project_name', grp: 'grp-name'},
+                {name: 'project_description', grp: 'grp-desc'},
+                {name: 'target_market', grp: 'grp-market'},
+                {name: 'objectives', grp: 'grp-obj'},
+                {name: 'budget', grp: 'grp-budget'}
+            ];
+            
+            try {
+                requiredFields.forEach(f => {
+                    const el = document.querySelector('[name="' + f.name + '"]');
+                    const grp = document.getElementById(f.grp);
+                    
+                    if (el && grp) {
+                        if (!el.value.trim() || (f.name === 'budget' && isNaN(el.value))) {
+                            grp.classList.add('has-error');
+                            isValid = false;
+                        } else {
+                            grp.classList.remove('has-error');
+                        }
+                    }
+                });
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    const firstErr = document.querySelector('.has-error');
+                    if (firstErr) {
+                        firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    return; // Stop submission
+                }
+            } catch (err) {
+                console.error("Validation error: ", err);
+            }
+
+            // Execute UI loading state
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const overlay = document.getElementById('loadingOverlay');
+            
+            if (btn && btnText) {
+                btn.disabled = true;
+                btnText.textContent = "◌ ANALYZING PROJECT...";
+                btn.style.boxShadow = '0 0 30px rgba(214,168,79,0.5)';
+            }
+            
+            if (overlay) {
+                overlay.style.display = 'flex';
+                setTimeout(() => { overlay.classList.add('visible'); }, 50);
+            }
+        });
+        
+        // Remove error state and check completion on input interaction
+        const reqFields = document.querySelectorAll('input[required], textarea[required]');
+        const subBtn = document.getElementById('submitBtn');
+        document.querySelectorAll('input, textarea, select').forEach(el => {
+            el.addEventListener('input', function() {
+                const grp = this.closest('.form-group');
+                if(grp && grp.classList.contains('has-error')) {
+                    grp.classList.remove('has-error');
+                }
+                
+                let allFilled = true;
+                reqFields.forEach(f => {
+                    if(!f.value.trim()) allFilled = false;
+                });
+                if(allFilled) {
+                    subBtn.classList.add('btn-ready');
+                } else {
+                    subBtn.classList.remove('btn-ready');
+                }
+            });
+        });
+
+        // Character counter logic
+        const projectDesc = document.querySelector('textarea[name="project_description"]');
+        if (projectDesc) {
+            const counter = projectDesc.parentElement.querySelector('.char-counter');
+            if (counter) {
+                projectDesc.addEventListener('input', () => {
+                    counter.textContent = `${projectDesc.value.length}/500`;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
