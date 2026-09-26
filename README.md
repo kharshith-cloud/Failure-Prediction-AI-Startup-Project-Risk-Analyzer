@@ -1,8 +1,8 @@
 # Failure Prediction AI – Startup & Project Risk Analyzer
 
-> Infosys Springboard Virtual Internship Project
+> **Infosys Springboard Virtual Internship Project**
 
-![Project Preview](assets/project-preview.png)
+![Failure Prediction AI Dashboard](assets/project-dashboard.png)
 
 ## Overview
 
@@ -62,13 +62,13 @@ The core risk engine calculates a comprehensive risk score (0-100) using defined
 - Innovation Level
 - Market Research
 
-Based on the score, the risk is categorized as:
+Based on the implemented project risk inputs and scoring rules, the risk is categorized as:
 - **0–39:** LOW RISK
 - **40–69:** MEDIUM RISK
 - **70–100:** HIGH RISK
 
 The system also calculates the **Success Probability** using the formula:
-`Success Probability = 100 − Risk Score`
+`Success Probability = 100 - Risk Score`
 
 ### SWOT Analysis
 The system automatically maps project characteristics to generate a comprehensive SWOT matrix:
@@ -84,7 +84,7 @@ Feasibility is evaluated across four distinct dimensions:
 - Competitive Advantage
 - Resource Availability
 
-The final feasibility score is aggregated as the average of these four dimensions, providing a clear metric on how practical it is to execute the project.
+The final feasibility score is the arithmetic mean of these four values.
 
 ### AI Recommendations
 Based on the project's unique conditions and the calculated risk profile, the system generates targeted strategic recommendations to improve the project's chances of success.
@@ -94,13 +94,13 @@ The mitigation engine maps specific identified risk conditions (e.g., high compe
 
 ### LangGraph AI Reasoning Workflow
 The intelligence pipeline is orchestrated using a structured reasoning workflow consisting of five stages:
-1. **Data Ingestion:** Structured extraction of user inputs.
-2. **Risk Analysis:** Calculation of risk and feasibility metrics.
-3. **Strategic Reasoning:** Generation of SWOT and mitigation strategies.
-4. **Validation:** Checking data consistency and fallback handling.
-5. **Report Generation:** Compiling the final dashboard data.
+1. Data Ingestion
+2. Risk Analysis
+3. Strategic Reasoning
+4. Validation
+5. Report Generation
 
-### Final Report
+### Final Assessment / Report
 The output of the workflow is a beautifully rendered, interactive dashboard containing:
 - Consolidated assessment metrics
 - Risk score & success probability
@@ -129,40 +129,152 @@ Users can also export this data as a downloadable final report.
 
 ## System Architecture
 
-The following diagram illustrates the complete data flow and system architecture:
-
 ```mermaid
 flowchart TD
     A[Project Input] --> B[Flask Application]
-    B --> C[PostgreSQL]
+    B --> C[(PostgreSQL Database)]
+
     C --> D[Market Analysis]
     C --> E[Competitor Analysis]
+
     D --> F[Risk Assessment]
     E --> F
+
     F --> G[SWOT Analysis]
     F --> H[Feasibility Assessment]
+
     G --> I[Recommendations]
     H --> I
+
     I --> J[Risk Mitigation]
     J --> K[LangGraph Workflow]
     K --> L[Final Assessment]
     L --> M[Dashboard & Report]
 ```
 
+## Project Structure
+
+```text
+Failure-Prediction-AI-Startup-Project-Risk-Analyzer/
+│
+├── assets/
+│   └── project-dashboard.png
+│
+├── static/
+│   └── style.css
+│
+├── templates/
+│   ├── index.html
+│   └── result.html
+│
+├── app.py
+├── database.py
+├── market_analysis.py
+├── competitor_analysis.py
+├── risk_engine.py
+├── swot_analysis.py
+├── feasibility.py
+├── recommendation_engine.py
+├── mitigation_engine.py
+├── llm_service.py
+├── langgraph_agent.py
+├── report_generator.py
+├── wsgi.py
+│
+├── run_tests.py
+├── test_submit.py
+│
+├── requirements.txt
+├── .env.example
+├── .gitignore
+└── README.md
+```
+
+## Installation / Setup
+
+1. **Clone repository:**
+   ```bash
+   git clone https://github.com/kharshith-cloud/Failure-Prediction-AI-Startup-Project-Risk-Analyzer.git
+   cd Failure-Prediction-AI-Startup-Project-Risk-Analyzer
+   ```
+
+2. **Create virtual environment:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install requirements:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configure .env:**
+   Copy `.env.example` to `.env` and configure your credentials.
+   ```bash
+   cp .env.example .env
+   ```
+   Ensure `.env` contains:
+   ```env
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=failure_prediction_db
+   DB_USER=your_user
+   DB_PASSWORD=your_password
+   GEMINI_API_KEY=your_gemini_api_key
+   ```
+
+5. **Create/configure PostgreSQL database:**
+   Create a PostgreSQL database named `failure_prediction_db` and ensure the credentials match your `.env` file. The application will automatically create the required tables upon initialization.
+
+## Running the Application
+
+Start the Flask server:
+```bash
+python app.py
+```
+Access the application at `http://localhost:5000`.
+
+## Testing
+
+Run the automated test suite to verify deterministic logic, AI integration, and workflow orchestration:
+```bash
+python run_tests.py
+```
+
 ## Development Milestones
 
-### Milestone 1: Environment Setup & Foundation
-- Initialized the Python/Flask environment and configured the PostgreSQL database schema.
-- Established the foundational project structure and basic routes.
+### Milestone 1 – Foundation & Market Intelligence
+- Project input collection
+- PostgreSQL persistence
+- Market analysis
+- Competitor analysis
 
-### Milestone 2: Risk & Feasibility Engines
-- Developed the deterministic risk calculation engine based on project inputs.
-- Implemented the four-dimensional feasibility assessment system.
+### Milestone 2 – Risk & Feasibility Intelligence
+- Risk scoring
+- Success probability
+- SWOT analysis
+- Feasibility assessment
 
-### Milestone 3: Intelligence & AI Integration
-- Integrated Gemini AI and LangGraph workflows.
-- Developed the SWOT analysis, competitor assessment, and risk mitigation strategies.
+### Milestone 3 – AI & Strategic Intelligence
+- Recommendations
+- Risk mitigation
+- Gemini integration
+- LangGraph workflow
+- Deterministic fallback
 
-### Milestone 4: Frontend UI & Final Reporting
-- Designed a premium, interactive frontend workspace.
-- Implemented the final dashboard and downloadable report generation.
+### Milestone 4 – Dashboard & Final Reporting
+- Professional dashboard
+- Final assessment
+- Report generation/download
+- Validation
+- Error handling
+- Performance measurement
+- Deployment readiness
+- Testing
+
+## Future Enhancements
+- Integration of real-time market data APIs.
+- User authentication and role-based access control.
+- Historical trend analysis and machine learning based risk predictions.
+- Export to PDF and advanced customizable reports.
